@@ -197,6 +197,7 @@
                     <a href="#ferramentas" class="nav-link font-medium px-3 py-2 rounded-md">Ferramentas</a>
                     <a href="#laboratorio" class="nav-link font-medium px-3 py-2 rounded-md text-amber-600 dark:text-amber-400">Laboratório</a>
                     <a href="#avancado" class="nav-link font-medium px-3 py-2 rounded-md">Avançado</a>
+                    <a href="#biblioteca" class="nav-link font-medium px-3 py-2 rounded-md">Biblioteca</a>
                     <a href="#tendencias" class="nav-link font-medium px-3 py-2 rounded-md">Tendências</a>
                 </div>
 
@@ -224,6 +225,7 @@
                 <a href="#ferramentas" class="block py-2 px-4 text-sm nav-link">Ferramentas</a>
                 <a href="#laboratorio" class="block py-2 px-4 text-sm nav-link text-amber-600 dark:text-amber-400">Laboratório</a>
                 <a href="#avancado" class="block py-2 px-4 text-sm nav-link">Avançado</a>
+                <a href="#biblioteca" class="block py-2 px-4 text-sm nav-link">Biblioteca</a>
                 <a href="#tendencias" class="block py-2 px-4 text-sm nav-link">Tendências</a>
             </div>
         </nav>
@@ -493,6 +495,103 @@
                                 <h5 class="font-semibold">Cisco CCNP (Cisco Certified Network Professional)</h5>
                                 <p class="secondary">Certificação de nível profissional que exige um conhecimento mais profundo. Possui trilhas de especialização, como Enterprise, Security e Data Center, validando habilidades avançadas em planejamento, implementação e troubleshooting de redes complexas.</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="biblioteca" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Biblioteca de Referência Rápida</h3>
+                <p class="mb-10 max-w-prose secondary">Uma coleção de informações práticas, comandos e scripts para auxiliar no diagnóstico e automação de tarefas de rede no dia a dia.</p>
+                <div class="space-y-8">
+                    <div class="card p-8 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-4">Problemas Comuns e Soluções</h4>
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-semibold mb-2">Problema: Sem Conectividade com a Internet</h5>
+                                <ol class="list-decimal list-inside text-sm space-y-2 secondary">
+                                    <li><strong>Verificar IP local:</strong> Use `ipconfig` (Windows) ou `ip addr` (Linux) para ver se o computador tem um endereço IP válido (não um APIPA 169.254.x.x).</li>
+                                    <li><strong>Testar Gateway:</strong> Use `ping [endereço do gateway]` para verificar a conectividade com o roteador local. Se falhar, o problema é na rede local (cabo, switch, Wi-Fi).</li>
+                                    <li><strong>Testar DNS:</strong> Use `ping 8.8.8.8` para testar a conectividade com um IP externo. Se funcionar, mas `ping www.google.com` não, o problema é de DNS.</li>
+                                    <li><strong>Verificar Rota:</strong> Use `tracert 8.8.8.8` para ver em qual ponto da rota a conexão está falhando.</li>
+                                </ol>
+                            </div>
+                            <div class="border-t border-border-color my-6"></div>
+                            <div>
+                                <h5 class="font-semibold mb-2">Problema: Lentidão na Rede</h5>
+                                <ol class="list-decimal list-inside text-sm space-y-2 secondary">
+                                    <li><strong>Verificar Latência e Perda:</strong> Use `ping -t [destino]` para monitorar a latência e a perda de pacotes ao longo do tempo. Picos de latência ou perda de pacotes indicam instabilidade.</li>
+                                    <li><strong>Identificar Gargalos:</strong> Use `tracert [destino]` para identificar se algum salto específico na rota está com latência alta.</li>
+                                    <li><strong>Verificar Utilização da Banda:</strong> Acesse a interface do roteador ou use ferramentas de monitoramento para verificar se o link de internet está saturado.</li>
+                                    <li><strong>Analisar Tráfego Local:</strong> Use o Wireshark para procurar por broadcast storms ou tráfego excessivo que possa estar congestionando a rede local.</li>
+                                </ol>
+                            </div>
+                             <div class="border-t border-border-color my-6"></div>
+                            <div>
+                                <h5 class="font-semibold mb-2">Problema: Falha de Resolução de Nomes (DNS)</h5>
+                                <ol class="list-decimal list-inside text-sm space-y-2 secondary">
+                                    <li><strong>Usar `nslookup`:</strong> Execute `nslookup www.google.com`. Se retornar um erro, o DNS não está funcionando.</li>
+                                    <li><strong>Verificar Servidores DNS:</strong> Use `ipconfig /all` para ver quais servidores DNS estão configurados. Tente pingar os endereços IP desses servidores.</li>
+                                    <li><strong>Limpar Cache DNS:</strong> Use `ipconfig /flushdns` (Windows) para limpar o cache de DNS local, que pode estar corrompido.</li>
+                                    <li><strong>Testar com DNS Público:</strong> Configure manualmente um DNS público (como 8.8.8.8 do Google) para ver se o problema é com o servidor DNS do seu provedor.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-8 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-4">Scripts Python Essenciais para Automação e Testes</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-100 dark:bg-slate-800/50">
+                                    <tr>
+                                        <th class="p-3 font-semibold text-left">Função</th>
+                                        <th class="p-3 font-semibold text-left">Código Python</th>
+                                        <th class="p-3 font-semibold text-left">Bibliotecas</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border-color">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="p-3 align-top"><strong>Verificar Conectividade (Ping)</strong><p class="text-xs secondary mt-1">Testa se uma lista de hosts está online.</p></td>
+                                        <td class="p-3"><div class="code-block text-xs"><pre><code>import os
+
+hosts = ['8.8.8.8', '192.168.1.1', 'google.com']
+for host in hosts:
+    response = os.system(f"ping -c 1 {host}")
+    if response == 0:
+        print(f"{host} está online")
+    else:
+        print(f"{host} está offline")</code></pre></div></td>
+                                        <td class="p-3 align-top font-mono text-xs">os</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="p-3 align-top"><strong>Scanner de Portas Abertas</strong><p class="text-xs secondary mt-1">Verifica se portas comuns estão abertas em um host.</p></td>
+                                        <td class="p-3"><div class="code-block text-xs"><pre><code>import socket
+
+target = '127.0.0.1'
+ports = [22, 80, 443, 3389]
+for port in ports:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex((target, port))
+    if result == 0:
+        print(f"Porta {port} está aberta")
+    sock.close()</code></pre></div></td>
+                                        <td class="p-3 align-top font-mono text-xs">socket</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="p-3 align-top"><strong>Resolver Nome de Domínio</strong><p class="text-xs secondary mt-1">Obtém o endereço IP de um hostname.</p></td>
+                                        <td class="p-3"><div class="code-block text-xs"><pre><code>import socket
+
+hostname = 'www.google.com'
+try:
+    ip_address = socket.gethostbyname(hostname)
+    print(f"O IP de {hostname} é {ip_address}")
+except socket.gaierror:
+    print(f"Não foi possível resolver {hostname}")</code></pre></div></td>
+                                        <td class="p-3 align-top font-mono text-xs">socket</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
