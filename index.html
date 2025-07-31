@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Interativo de Redes e Infraestrutura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <!-- Palette & Design System by Cline, UI/UX Specialist -->
+    <style>
+        :root {
+            --bg-color: #fdfdff; /* Slightly off-white */
+            --text-color: #3a3f50; /* Softer black */
+            --text-color-light: #6b7280; /* Lighter gray for secondary text */
+            --card-bg: #ffffff;
+            --header-bg: rgba(253, 253, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.07);
+            --heading-color: #1a1e2c;
+            --accent-color: #2563eb;
+            --accent-color-hover: #1d4ed8;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --terminal-bg: #1a1e2c;
+            --terminal-text: #e2e8f0;
+        }
+
+        html.dark {
+            --bg-color: #0b0f1a; /* Deep, dark blue */
+            --text-color: #a6b0c4;
+            --text-color-light: #717d96;
+            --card-bg: #131826;
+            --header-bg: rgba(11, 15, 26, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --heading-color: #f0f4ff;
+            --accent-color: #38bdf8; /* Brighter blue for dark mode */
+            --accent-color-hover: #0ea5e9;
+            --code-bg: #020617;
+            --code-text: #cbd5e1;
+            --terminal-bg: #020617;
+            --terminal-text: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .osi-layer-info {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .group:hover .osi-layer-info {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .nav-link {
+            transition: color 0.2s;
+            color: var(--text-color-light);
+        }
+        .nav-link:hover {
+            color: var(--heading-color);
+        }
+        .nav-link.active {
+            color: var(--accent-color);
+        }
+        .code-block, .terminal {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid var(--border-color);
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+        html.dark .card:hover {
+             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+        }
+        .main-header {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--heading-color);
+        }
+        p {
+            color: var(--text-color);
+            line-height: 1.65;
+        }
+        p.secondary {
+             color: var(--text-color-light);
+        }
+        .terminal {
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            min-height: 200px;
+        }
+        .terminal-prompt {
+            color: #4ade80; /* green-400 */
+        }
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--accent-color-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        html.dark .btn-primary {
+            color: var(--bg-color);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--heading-color);
+        }
+        .btn-secondary:hover {
+            background-color: var(--bg-color);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        .form-input {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--accent-color-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header backdrop-blur-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center h-16">
+                <h1 class="text-xl font-semibold tracking-tight">Guia de Redes</h1>
+                
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-2 ml-10">
+                    <a href="#fundamentos" class="nav-link font-medium px-3 py-2 rounded-md">Fundamentos</a>
+                    <a href="#equipamentos" class="nav-link font-medium px-3 py-2 rounded-md">Equipamentos</a>
+                    <a href="#protocolos" class="nav-link font-medium px-3 py-2 rounded-md">Protocolos</a>
+                    <a href="#seguranca" class="nav-link font-medium px-3 py-2 rounded-md">Segurança</a>
+                    <a href="#pratica" class="nav-link font-medium px-3 py-2 rounded-md">Prática</a>
+                    <a href="#ferramentas" class="nav-link font-medium px-3 py-2 rounded-md">Ferramentas</a>
+                    <a href="#laboratorio" class="nav-link font-medium px-3 py-2 rounded-md text-amber-600 dark:text-amber-400">Laboratório</a>
+                    <a href="#avancado" class="nav-link font-medium px-3 py-2 rounded-md">Avançado</a>
+                    <a href="#tendencias" class="nav-link font-medium px-3 py-2 rounded-md">Tendências</a>
+                </div>
+
+                <!-- Controls (pushed to the right) -->
+                <div class="flex items-center ml-auto">
+                    <button id="theme-toggle" class="hidden md:block p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                        <!-- Icons will be injected by JS -->
+                    </button>
+                    <div class="md:hidden flex items-center">
+                         <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors mr-2">
+                            <!-- Icons will be injected by JS -->
+                        </button>
+                        <button id="mobile-menu-button" class="text-slate-600 dark:text-slate-300 hover:text-accent-color dark:hover:text-accent-color focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="#fundamentos" class="block py-2 px-4 text-sm nav-link">Fundamentos</a>
+                <a href="#equipamentos" class="block py-2 px-4 text-sm nav-link">Equipamentos</a>
+                <a href="#protocolos" class="block py-2 px-4 text-sm nav-link">Protocolos</a>
+                <a href="#seguranca" class="block py-2 px-4 text-sm nav-link">Segurança</a>
+                <a href="#pratica" class="block py-2 px-4 text-sm nav-link">Prática</a>
+                <a href="#ferramentas" class="block py-2 px-4 text-sm nav-link">Ferramentas</a>
+                <a href="#laboratorio" class="block py-2 px-4 text-sm nav-link text-amber-600 dark:text-amber-400">Laboratório</a>
+                <a href="#avancado" class="block py-2 px-4 text-sm nav-link">Avançado</a>
+                <a href="#tendencias" class="block py-2 px-4 text-sm nav-link">Tendências</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex">
+        <aside class="hidden lg:block w-64 sticky top-24 self-start pr-8">
+            <nav id="side-nav" class="flex flex-col space-y-1 text-sm">
+                <!-- Side nav links will be injected by JS -->
+            </nav>
+        </aside>
+
+        <main class="flex-1 py-12 md:py-16">
+
+            <section id="intro" class="text-center mb-24">
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter">Manual Interativo de Redes</h2>
+                <p class="max-w-3xl mx-auto text-lg secondary">
+                    Explore os conceitos complexos de redes de computadores de forma visual e interativa. Este guia foi projetado para ajudar estudantes e profissionais a dominar os fundamentos e as tecnologias que moldam o mundo digital.
+                </p>
+            </section>
+
+            <section id="fundamentos" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Fundamentos de Redes</h3>
+                <p class="mb-10 max-w-prose secondary">
+                    Toda grande infraestrutura começa com uma base sólida. Esta seção desmistifica os conceitos essenciais que governam a comunicação digital, desde como as redes são classificadas por tamanho até os modelos teóricos que padronizam a troca de informações.
+                </p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-3">Tipos de Rede</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>LAN:</strong> Rede local em um escritório ou edifício.</div></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>WAN:</strong> Conecta redes em vastas áreas geográficas.</div></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>WLAN:</strong> Uma LAN sem fios (Wi-Fi).</div></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>MAN:</strong> Cobre uma área metropolitana.</div></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>PAN:</strong> Rede de curtíssimo alcance (Bluetooth).</div></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">●</span><div><strong>SAN:</strong> Rede de alta performance para armazenamento.</div></li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-3">Topologias de Rede</h4>
+                         <ul class="space-y-2 text-sm">
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">●</span><div><strong>Estrela:</strong> Ponto central (switch). Padrão moderno.</div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">●</span><div><strong>Malha:</strong> Alta redundância, múltiplos caminhos.</div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">●</span><div><strong>Barramento:</strong> Cabo central único. Obsoleta.</div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">●</span><div><strong>Anel:</strong> Circuito fechado. Obsoleta.</div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">●</span><div><strong>Híbrida:</strong> Combinação de topologias.</div></li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 rounded-xl md:col-span-2 lg:col-span-1">
+                        <h4 class="font-semibold text-lg mb-3">Meios de Transmissão</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start"><span class="text-purple-500 mr-3 mt-1">●</span><div><strong>Par Trançado:</strong> Cabo de cobre padrão para LANs.</div></li>
+                            <li class="flex items-start"><span class="text-purple-500 mr-3 mt-1">●</span><div><strong>Fibra Óptica:</strong> Transmissão via luz. Alta velocidade.</div></li>
+                            <li class="flex items-start"><span class="text-purple-500 mr-3 mt-1">●</span><div><strong>Wireless:</strong> Ondas de rádio (Wi-Fi). Mobilidade.</div></li>
+                            <li class="flex items-start"><span class="text-purple-500 mr-3 mt-1">●</span><div><strong>Cabo Coaxial:</strong> Usado em TV a cabo/internet.</div></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12 card p-8 rounded-xl">
+                    <h4 class="font-bold text-xl mb-4 text-center">Modelos OSI vs. TCP/IP</h4>
+                    <p class="text-center mb-8 max-w-2xl mx-auto secondary">Passe o mouse sobre as camadas para ver os detalhes de cada modelo de comunicação.</p>
+                    <div class="flex flex-col md:flex-row justify-center gap-8">
+                        <div id="osi-model" class="w-full md:w-1/2">
+                            <h5 class="font-semibold text-center mb-2">Modelo OSI (7 Camadas)</h5>
+                            <div class="space-y-1"></div>
+                        </div>
+                        <div id="tcpip-model" class="w-full md:w-1/2">
+                            <h5 class="font-semibold text-center mb-2">Modelo TCP/IP (4 Camadas)</h5>
+                            <div class="space-y-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="equipamentos" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Equipamentos e Hardware</h3>
+                <p class="mb-10 max-w-prose secondary">Conheça os componentes físicos que dão vida a uma rede. Cada dispositivo tem um papel crucial na infraestrutura.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Hub vs. Switch vs. Roteador</h4>
+                        <p class="text-sm secondary mt-2"><strong>Hub (Camada 1):</strong> Repete o sinal para todos. Ineficiente.</p>
+                        <p class="text-sm secondary mt-2"><strong>Switch (Camada 2):</strong> Encaminha dados para o destino correto (MAC).</p>
+                        <p class="text-sm secondary mt-2"><strong>Roteador (Camada 3):</strong> Conecta redes diferentes (IP).</p>
+                    </div>
+                     <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Outros Dispositivos Essenciais</h4>
+                        <p class="text-sm secondary mt-2"><strong>Access Point:</strong> Cria uma rede sem fio (WLAN).</p>
+                        <p class="text-sm secondary mt-2"><strong>Firewall:</strong> Barreira de segurança que filtra o tráfego.</p>
+                        <p class="text-sm secondary mt-2"><strong>Modem:</strong> Converte o sinal do provedor de internet.</p>
+                    </div>
+                     <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Power over Ethernet (PoE)</h4>
+                        <p class="text-sm secondary mt-2">Permite que cabos de rede transmitam energia elétrica, ideal para alimentar dispositivos como câmeras e APs.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="protocolos" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Protocolos e Endereçamento</h3>
+                <p class="mb-10 max-w-prose secondary">Explore a lógica por trás da comunicação: endereços IP que identificam cada dispositivo e os protocolos que garantem a entrega dos dados.</p>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="card p-6 rounded-xl">
+                         <h4 class="font-semibold text-lg mb-4 text-center">IPv4 vs. IPv6</h4>
+                         <p class="text-sm mb-4 secondary">O IPv4 (32 bits) está esgotado. O IPv6 (128 bits) oferece um número quase infinito de endereços, sendo a solução para o crescimento da Internet.</p>
+                         <div class="chart-container h-64 md:h-80">
+                             <canvas id="ipVersionChart"></canvas>
+                         </div>
+                    </div>
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Conceitos de Endereçamento</h4>
+                        <ul class="space-y-3 text-sm secondary">
+                            <li><strong>Subnetting:</strong> Dividir uma rede grande em redes menores.</li>
+                            <li><strong>Máscara/CIDR:</strong> Define a porção de rede e de hosts de um IP.</li>
+                            <li><strong>IP Público vs. Privado:</strong> IPs públicos são únicos na Internet; privados são para redes locais.</li>
+                            <li><strong>DHCP vs. Estático:</strong> DHCP atribui IPs automaticamente; estático é fixo.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-6 rounded-xl">
+                    <h4 class="font-semibold text-lg mb-4">Protocolos de Comunicação Comuns</h4>
+                    <input type="text" id="protocol-search" placeholder="Pesquisar por protocolo (ex: HTTP, DNS)..." class="form-input mb-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100 dark:bg-slate-800/50">
+                                <tr>
+                                    <th class="p-3 font-semibold">Protocolo</th>
+                                    <th class="p-3 font-semibold">Porta Padrão</th>
+                                    <th class="p-3 font-semibold">Tipo</th>
+                                    <th class="p-3 font-semibold hidden md:table-cell">Função</th>
+                                </tr>
+                            </thead>
+                            <tbody id="protocol-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="seguranca" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Segurança de Redes</h3>
+                <p class="mb-10 max-w-prose secondary">Proteger uma rede é tão importante quanto construí-la. Explore as ferramentas e estratégias para defender a infraestrutura contra ameaças.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Firewall & IPS</h4>
+                        <p class="text-sm secondary"><strong>Firewall:</strong> Filtra o tráfego. <strong>IDS:</strong> Detecta ameaças. <strong>IPS:</strong> Previne ameaças ativamente.</p>
+                    </div>
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">VPN & Criptografia</h4>
+                        <p class="text-sm secondary"><strong>VPN:</strong> Cria um "túnel" seguro e criptografado sobre uma rede pública, garantindo acesso remoto seguro.</p>
+                    </div>
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">VLAN & Segmentação</h4>
+                        <p class="text-sm secondary"><strong>VLAN:</strong> Divide um switch físico em múltiplas redes lógicas isoladas, melhorando segurança e performance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pratica" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Configuração e Prática</h3>
+                <p class="mb-10 max-w-prose secondary">A teoria ganha vida na prática. Esta seção fornece exemplos de comandos para tarefas essenciais e ferramentas de diagnóstico.</p>
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-3">Configuração de IP (Windows via CMD)</h4>
+                        <div class="code-block text-xs">
+                            <p>> netsh interface ipv4 set address name="Ethernet0" static 192.168.1.100 255.255.255.0 192.168.1.1</p>
+                        </div>
+                    </div>
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-3">Criação de VLAN (Cisco IOS)</h4>
+                        <div class="code-block text-xs">
+                            <p>Switch(config)# vlan 10</p>
+                            <p>Switch(config-vlan)# name VENDAS</p>
+                            <p>Switch(config-if)# switchport access vlan 10</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ferramentas" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Ferramentas Interativas</h3>
+                <p class="mb-10 max-w-prose secondary">Utilize estas ferramentas para aplicar e testar seus conhecimentos de rede de forma prática.</p>
+                <div class="card p-8 rounded-xl">
+                    <h4 class="font-semibold text-lg mb-4">Calculadora de Sub-redes IPv4</h4>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <input type="text" id="subnet-input" placeholder="Ex: 192.168.10.5/26" class="form-input flex-grow">
+                        <button id="subnet-calculate-btn" class="btn btn-primary w-full sm:w-auto">Calcular</button>
+                    </div>
+                    <div id="subnet-results" class="mt-6 text-sm space-y-2">
+                        <!-- Subnet results will be displayed here -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="laboratorio" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Laboratório de Diagnóstico Interativo</h3>
+                <p class="mb-10 max-w-prose secondary">Aprenda a diagnosticar problemas de rede em um ambiente simulado. Siga os passos, execute os comandos e escolha a melhor ação para resolver o cenário.</p>
+                <div class="card p-8 rounded-xl">
+                    <div id="lab-container">
+                        <h4 id="lab-title" class="font-semibold text-lg mb-2"></h4>
+                        <p id="lab-scenario" class="text-sm mb-4 secondary"></p>
+                        <div class="terminal" id="lab-output"></div>
+                        <div id="lab-commands" class="mt-4 flex flex-wrap gap-2"></div>
+                        <div id="lab-choices" class="mt-4 space-y-2"></div>
+                        <div id="lab-feedback" class="mt-4 p-4 rounded-md text-sm hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="avancado" class="mb-24 scroll-mt-24">
+                <h3 class="text-3xl font-bold mb-3 tracking-tight">Recursos Avançados</h3>
+                <p class="mb-10 max-w-prose secondary">Aprofunde seus conhecimentos com estudos de caso e materiais de preparação para certificações do setor.</p>
+                <div class="space-y-6">
+                    <div class="card p-8 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-4">Casos de Estudo</h4>
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-semibold mb-2">Cenário 1: Pequeno Escritório (15 funcionários)</h5>
+                                <ul class="list-disc list-inside text-sm space-y-1 secondary">
+                                    <li><strong>Requisitos:</strong> Acesso à internet, compartilhamento de arquivos/impressora, Wi-Fi seguro para funcionários e uma rede separada para convidados.</li>
+                                    <li><strong>Solução Proposta:</strong>
+                                        <ul class="list-circle list-inside ml-4 mt-1">
+                                            <li>1x Roteador/Firewall de borda.</li>
+                                            <li>1x Switch gerenciável de 24 portas com suporte a PoE.</li>
+                                            <li>2x Access Points Wi-Fi 6 com alimentação PoE.</li>
+                                            <li><strong>Configuração Chave:</strong> Criar duas VLANs: VLAN 10 (Interna) e VLAN 99 (Convidados). Aplicar regras de firewall para isolar a VLAN de convidados da rede interna.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="border-t border-border-color my-6"></div>
+                            <div>
+                                <h5 class="font-semibold mb-2">Cenário 2: Rede Corporativa Média (200 funcionários, 2 andares)</h5>
+                                <ul class="list-disc list-inside text-sm space-y-1 secondary">
+                                    <li><strong>Requisitos:</strong> Alta disponibilidade, segmentação por departamento (Vendas, RH, TI), suporte a VoIP com qualidade, cobertura Wi-Fi completa com roaming.</li>
+                                    <li><strong>Solução Proposta:</strong>
+                                        <ul class="list-circle list-inside ml-4 mt-1">
+                                            <li>Design hierárquico: Switches de acesso em cada andar e um par de switches de distribuição/core em alta disponibilidade (HA).</li>
+                                            <li>Links de fibra óptica redundantes entre os switches de acesso e distribuição.</li>
+                                            <li>Múltiplas VLANs para cada departamento e uma VLAN dedicada para Voz (com QoS para priorizar tráfego de VoIP).</li>
+                                            <li>Múltiplos APs gerenciados por um controlador WLAN para gerenciar roaming e políticas centralizadas.</li>
+                                            <li>Firewall de Próxima Geração (NGFW) no perímetro da rede.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-8 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-4">Preparação para Certificação</h4>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <h5 class="font-semibold">CompTIA Network+</h5>
+                                <p class="secondary">Certificação fundamental e neutra em relação a fornecedores. Valida o conhecimento essencial em topologias, protocolos, segurança e troubleshooting de redes. Ideal para quem está começando.</p>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold">Cisco CCNA (Cisco Certified Network Associate)</h5>
+                                <p class="secondary">Uma das certificações mais reconhecidas da indústria. Foca na instalação, configuração e operação de redes de pequeno e médio porte, com ênfase em produtos e soluções da Cisco.</p>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold">Cisco CCNP (Cisco Certified Network Professional)</h5>
+                                <p class="secondary">Certificação de nível profissional que exige um conhecimento mais profundo. Possui trilhas de especialização, como Enterprise, Security e Data Center, validando habilidades avançadas em planejamento, implementação e troubleshooting de redes complexas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tendencias" class="scroll-mt-24">
+                 <h3 class="text-3xl font-bold mb-3 tracking-tight">Tendências e Novas Tecnologias</h3>
+                 <p class="mb-10 max-w-prose secondary">Fique por dentro das tecnologias que estão moldando o futuro da conectividade.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">5G & Wi-Fi 6/6E</h4>
+                        <p class="text-sm secondary">Conectividade sem fio de altíssima velocidade, baixa latência e maior eficiência.</p>
+                    </div>
+                     <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">IoT & Edge Computing</h4>
+                        <p class="text-sm secondary">Processamento de dados na borda da rede para respostas mais rápidas.</p>
+                    </div>
+                     <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">SDN & Automação</h4>
+                        <p class="text-sm secondary">Redes definidas por software, permitindo gerenciamento centralizado e automação.</p>
+                    </div>
+                     <div class="card p-6 rounded-xl">
+                        <h4 class="font-semibold text-lg mb-2">Segurança Zero Trust</h4>
+                        <p class="text-sm secondary">Modelo de segurança que não confia em ninguém por padrão, verificando tudo.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="text-slate-500 mt-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-sm border-t border-border-color">
+            <p>© 2025 Carlos Antonio de Oliveira Piquet. Todos os direitos reservados.</p>
+
+             <p></p>Publicado sob a licença Creative Commons Attribution 4.0 International</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Theme Toggle ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+    const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`;
+    const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`;
+    
+    const applyTheme = (isDark) => {
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            themeToggle.innerHTML = sunIcon;
+            themeToggleMobile.innerHTML = sunIcon;
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeToggle.innerHTML = moonIcon;
+            themeToggleMobile.innerHTML = moonIcon;
+        }
+    };
+
+    const toggleTheme = () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        applyTheme(isDark);
+    };
+
+    themeToggle.addEventListener('click', toggleTheme);
+    themeToggleMobile.addEventListener('click', toggleTheme);
+
+    const savedTheme = localStorage.getItem('theme');
+    applyTheme(savedTheme === 'dark');
+
+    // --- Mobile Menu ---
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // --- OSI & TCP/IP Models ---
+    const osiData = [
+        { name: '7. Aplicação', pdu: 'Dados', func: 'Interface para aplicações (HTTP, FTP)', color: 'bg-red-500' },
+        { name: '6. Apresentação', pdu: 'Dados', func: 'Formatação, criptografia, compressão', color: 'bg-orange-500' },
+        { name: '5. Sessão', pdu: 'Dados', func: 'Gerenciamento de sessões', color: 'bg-yellow-500 text-slate-800' },
+        { name: '4. Transporte', pdu: 'Segmento/Datagrama', func: 'Conectividade ponta a ponta (TCP, UDP)', color: 'bg-green-500' },
+        { name: '3. Rede', pdu: 'Pacote', func: 'Endereçamento lógico e roteamento (IP)', color: 'bg-blue-500' },
+        { name: '2. Enlace', pdu: 'Quadro', func: 'Endereçamento físico (MAC)', color: 'bg-indigo-500' },
+        { name: '1. Física', pdu: 'Bit', func: 'Transmissão de bits no meio', color: 'bg-violet-500' }
+    ];
+    const tcpIpData = [
+        { name: 'Aplicação', mapsTo: 'Aplicação, Apresentação, Sessão', color: 'bg-red-500' },
+        { name: 'Transporte', mapsTo: 'Transporte', color: 'bg-green-500' },
+        { name: 'Internet', mapsTo: 'Rede', color: 'bg-blue-500' },
+        { name: 'Acesso à Rede', mapsTo: 'Enlace, Física', color: 'bg-indigo-500' }
+    ];
+    const osiContainer = document.getElementById('osi-model').querySelector('.space-y-1');
+    osiData.forEach(layer => {
+        const div = document.createElement('div');
+        div.className = `group relative p-3 ${layer.color} ${layer.name.includes('Sessão') ? 'text-slate-800' : 'text-white'} rounded-md text-center font-medium cursor-pointer`;
+        div.textContent = layer.name;
+        const info = document.createElement('div');
+        info.className = 'card osi-layer-info absolute left-full top-0 ml-4 w-64 p-4 rounded-lg shadow-xl z-10 opacity-0 transform -translate-x-4 pointer-events-none';
+        info.innerHTML = `<p class="font-bold">${layer.name}</p><p class="text-sm mt-1"><strong>Função:</strong> ${layer.func}</p><p class="text-sm mt-1"><strong>PDU:</strong> ${layer.pdu}</p>`;
+        div.appendChild(info);
+        osiContainer.appendChild(div);
+    });
+    const tcpIpContainer = document.getElementById('tcpip-model').querySelector('.space-y-1');
+    tcpIpData.forEach(layer => {
+        const div = document.createElement('div');
+        div.className = `group relative p-3 ${layer.color} text-white rounded-md text-center font-medium cursor-pointer`;
+        div.textContent = layer.name;
+        const info = document.createElement('div');
+        info.className = 'card osi-layer-info absolute right-full top-0 mr-4 w-64 p-4 rounded-lg shadow-xl z-10 opacity-0 transform translate-x-4 pointer-events-none';
+        info.innerHTML = `<p class="font-bold">${layer.name}</p><p class="text-sm mt-1"><strong>Mapeia para OSI:</strong> ${layer.mapsTo}</p>`;
+        div.appendChild(info);
+        tcpIpContainer.appendChild(div);
+    });
+
+    // --- IP Version Chart ---
+    const ipCtx = document.getElementById('ipVersionChart').getContext('2d');
+    new Chart(ipCtx, {
+        type: 'bar',
+        data: {
+            labels: ['IPv4 (32-bit)', 'IPv6 (128-bit)'],
+            datasets: [{
+                label: 'Número de Endereços',
+                data: [32, 128],
+                backgroundColor: ['#3b82f6', '#10b981'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            scales: { x: { type: 'logarithmic', title: { display: true, text: 'Bits de Endereço (Escala Log)' } } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => context.chart.data.labels[context.dataIndex] === 'IPv4 (32-bit)' ? '~4.3 Bilhões de endereços' : '~340 Undecilhões de endereços'
+                    }
+                }
+            }
+        }
+    });
+
+    // --- Protocol Table ---
+    const protocolData = [
+        { name: 'FTP', port: '20, 21', type: 'TCP', func: 'Transferência de arquivos' }, { name: 'SSH', port: '22', type: 'TCP', func: 'Acesso remoto seguro' },
+        { name: 'Telnet', port: '23', type: 'TCP', func: 'Acesso remoto não seguro' }, { name: 'SMTP', port: '25', type: 'TCP', func: 'Envio de e-mail' },
+        { name: 'DNS', port: '53', type: 'UDP/TCP', func: 'Resolução de nomes de domínio' }, { name: 'DHCP', port: '67, 68', type: 'UDP', func: 'Atribuição dinâmica de IP' },
+        { name: 'HTTP', port: '80', type: 'TCP', func: 'Navegação na Web' }, { name: 'POP3', port: '110', type: 'TCP', func: 'Recebimento de e-mail' },
+        { name: 'IMAP', port: '143', type: 'TCP', func: 'Recebimento de e-mail (sincronizado)' }, { name: 'SNMP', port: '161, 162', type: 'UDP', func: 'Gerenciamento de rede' },
+        { name: 'HTTPS', port: '443', type: 'TCP', func: 'Navegação na Web segura' }, { name: 'RDP', port: '3389', type: 'TCP', func: 'Área de Trabalho Remota (Windows)' },
+    ];
+    const protocolTableBody = document.getElementById('protocol-table');
+    const protocolSearchInput = document.getElementById('protocol-search');
+    function renderProtocols(filter = '') {
+        if (!protocolTableBody) return;
+        protocolTableBody.innerHTML = '';
+        const filteredData = protocolData.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+        if (filteredData.length === 0) {
+            protocolTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4">Nenhum protocolo encontrado.</td></tr>`;
+            return;
+        }
+        filteredData.forEach(p => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800';
+            row.innerHTML = `<td class="p-2 font-medium">${p.name}</td><td class="p-2">${p.port}</td><td class="p-2">${p.type}</td><td class="p-2 hidden md:table-cell">${p.func}</td>`;
+            protocolTableBody.appendChild(row);
+        });
+    }
+    if (protocolSearchInput) {
+        protocolSearchInput.addEventListener('input', (e) => renderProtocols(e.target.value));
+        renderProtocols();
+    }
+    
+    // --- Scroll Spy & Side Nav ---
+    const mainNavLinks = document.querySelectorAll('header nav a.nav-link');
+    const sideNavContainer = document.getElementById('side-nav');
+    const sections = document.querySelectorAll('main section');
+    
+    // Clear existing side nav before populating
+    if (sideNavContainer) {
+        sideNavContainer.innerHTML = '';
+
+        sections.forEach(section => {
+            const titleEl = section.querySelector('h3, h2');
+            if (titleEl) {
+                const title = titleEl.textContent;
+                const id = section.getAttribute('id');
+                if(id !== 'intro'){
+                    const link = document.createElement('a');
+                    link.href = `#${id}`;
+                    link.textContent = title;
+                    link.className = 'nav-link side-nav-link px-3 py-2 rounded-md text-sm';
+                    sideNavContainer.appendChild(link);
+                }
+            }
+        });
+    }
+
+    const sideNavLinks = document.querySelectorAll('.side-nav-link');
+    const allNavLinks = [...mainNavLinks, ...sideNavLinks];
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        allNavLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // --- Subnet Calculator ---
+    const subnetInput = document.getElementById('subnet-input');
+    const calculateBtn = document.getElementById('subnet-calculate-btn');
+    const resultsDiv = document.getElementById('subnet-results');
+
+    const ipToInt = (ip) => ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+    const intToIp = (int) => [(int >>> 24), (int >>> 16) & 0xFF, (int >>> 8) & 0xFF, int & 0xFF].join('.');
+
+    calculateBtn.addEventListener('click', () => {
+        const input = subnetInput.value.trim();
+        const [ipStr, cidrStr] = input.split('/');
+        
+        if (!ipStr || !cidrStr) {
+            resultsDiv.innerHTML = `<p class="text-red-500">Formato inválido. Use IP/CIDR (ex: 192.168.1.1/24).</p>`;
+            return;
+        }
+
+        const cidr = parseInt(cidrStr, 10);
+        if (isNaN(cidr) || cidr < 0 || cidr > 32) {
+            resultsDiv.innerHTML = `<p class="text-red-500">CIDR inválido. Deve ser entre 0 e 32.</p>`;
+            return;
+        }
+        
+        const ipOctets = ipStr.split('.');
+        if (ipOctets.length !== 4 || ipOctets.some(o => isNaN(parseInt(o)) || parseInt(o) < 0 || parseInt(o) > 255)) {
+            resultsDiv.innerHTML = `<p class="text-red-500">Endereço IP inválido.</p>`;
+            return;
+        }
+
+        const ip = ipToInt(ipStr);
+        const mask = -1 << (32 - cidr);
+        const networkAddr = ip & mask;
+        const broadcastAddr = networkAddr | (~mask);
+        const firstHost = networkAddr + 1;
+        const lastHost = broadcastAddr - 1;
+        const totalHosts = Math.pow(2, 32 - cidr);
+        const usableHosts = cidr < 31 ? totalHosts - 2 : 0;
+
+        resultsDiv.innerHTML = `
+            <p><strong>Endereço de Rede:</strong> <span class="font-mono text-blue-500 dark:text-sky-400">${intToIp(networkAddr)}</span></p>
+            <p><strong>Endereço de Broadcast:</strong> <span class="font-mono text-blue-500 dark:text-sky-400">${intToIp(broadcastAddr)}</span></p>
+            <p><strong>Máscara de Sub-rede:</strong> <span class="font-mono text-blue-500 dark:text-sky-400">${intToIp(mask)}</span></p>
+            <p><strong>Faixa de Hosts Válidos:</strong> <span class="font-mono text-green-600 dark:text-green-400">${cidr < 31 ? intToIp(firstHost) : 'N/A'} - ${cidr < 31 ? intToIp(lastHost) : 'N/A'}</span></p>
+            <p><strong>Total de Hosts:</strong> <span class="font-mono">${totalHosts}</span></p>
+            <p><strong>Hosts Utilizáveis:</strong> <span class="font-mono">${usableHosts > 0 ? usableHosts : 0}</span></p>
+        `;
+    });
+
+    // --- Interactive Troubleshooting Lab ---
+    const lab = {
+        title: document.getElementById('lab-title'),
+        scenario: document.getElementById('lab-scenario'),
+        output: document.getElementById('lab-output'),
+        commands: document.getElementById('lab-commands'),
+        choices: document.getElementById('lab-choices'),
+        feedback: document.getElementById('lab-feedback'),
+        currentState: 'start',
+        history: [],
+
+        states: {
+            'start': {
+                title: 'Cenário: Usuário sem acesso à Internet',
+                scenario: 'Um usuário no departamento de Vendas liga para o suporte, informando que não consegue acessar nenhum site. Outros usuários no mesmo departamento não relatam problemas. Onde você começa?',
+                commands: ['ipconfig /all', 'ping 192.168.10.1', 'ping 8.8.8.8'],
+                choices: [
+                    { text: 'Verificar a configuração IP do computador do usuário.', next: 'check_ip' },
+                    { text: 'Testar a conectividade com o gateway da rede.', next: 'check_gateway' },
+                    { text: 'Testar a conectividade com um servidor externo (DNS do Google).', next: 'check_dns' }
+                ]
+            },
+            'check_ip': {
+                output: `
+C:\> ipconfig /all
+
+Configuração de IP do Windows
+...
+Adaptador Ethernet Ethernet0:
+   Endereço IPv4. . . . . . . .  . . . . : 169.254.80.14(Preferencial)
+   Máscara de Sub-rede . . . . . . . . . : 255.255.0.0
+   Gateway Padrão. . . . . . . . . . . . :
+                `,
+                analysis: 'O resultado mostra um endereço APIPA (169.254.x.x). Isso indica que o computador não conseguiu obter um endereço IP do servidor DHCP. O problema é local, na máquina do usuário ou na sua conexão com a rede.',
+                choices: [
+                    { text: 'Verificar o cabo de rede do computador.', next: 'check_cable', correct: true },
+                    { text: 'Reiniciar o roteador da empresa.', next: 'restart_router_wrong' }
+                ]
+            },
+            'check_gateway': {
+                output: `
+C:\> ping 192.168.10.1
+
+Disparando 192.168.10.1 com 32 bytes de dados:
+Esgotado o tempo limite do pedido.
+Esgotado o tempo limite do pedido.
+...
+Estatísticas do Ping para 192.168.10.1:
+    Pacotes: Enviados = 4, Recebidos = 0, Perdidos = 4 (100% de perda)
+                `,
+                analysis: 'O computador não consegue se comunicar com o gateway padrão. Isso confirma que há um problema de conectividade fundamental entre a máquina e a rede local.',
+                 choices: [
+                    { text: 'Executar `ipconfig /all` para ver a configuração de IP.', next: 'check_ip', correct: true },
+                    { text: 'Verificar o firewall do servidor.', next: 'check_firewall_wrong' }
+                ]
+            },
+            'check_dns': {
+                output: `
+C:\> ping 8.8.8.8
+Host de destino inacessível.
+Host de destino inacessível.
+                `,
+                analysis: 'O ping para um IP externo falha, mas a mensagem "Host de destino inacessível" em vez de "Esgotado o tempo limite" sugere que o problema é anterior, provavelmente o computador nem sabe como sair da própria rede (falta de gateway).',
+                 choices: [
+                    { text: 'Verificar a conectividade com o gateway (`ping 192.168.10.1`).', next: 'check_gateway', correct: true },
+                ]
+            },
+            'check_cable': {
+                title: 'Problema Resolvido!',
+                scenario: 'Você pede ao usuário para verificar o cabo de rede e ele percebe que estava desconectado. Após reconectar, você pede para ele reiniciar o computador.',
+                commands: ['ipconfig /all'],
+                output: `
+C:\> ipconfig /all
+
+Configuração de IP do Windows
+...
+Adaptador Ethernet Ethernet0:
+   Endereço IPv4. . . . . . . .  . . . . : 192.168.10.115(Preferencial)
+   Máscara de Sub-rede . . . . . . . . . : 255.255.255.0
+   Gateway Padrão. . . . . . . . . . . . : 192.168.10.1
+   Servidores DNS. . . . . . . . . . . . : 192.168.10.5
+                                           8.8.8.8
+                `,
+                analysis: 'Diagnóstico Final: O problema era uma falha na Camada 1 (Física). O cabo de rede estava desconectado, impedindo o computador de contatar o servidor DHCP para obter um endereço IP válido. A reconexão do cabo resolveu o problema de conectividade.',
+                choices: [
+                    { text: 'Reiniciar o cenário.', next: 'start' }
+                ]
+            },
+             'restart_router_wrong': {
+                feedback: { type: 'error', text: 'Incorreto. Reiniciar o roteador afetaria toda a empresa, mas o problema foi relatado por apenas um usuário. O diagnóstico deve começar pelo ponto mais próximo do problema: a máquina do usuário.' },
+                previous: 'check_ip'
+            },
+            'check_firewall_wrong': {
+                feedback: { type: 'error', text: 'Incorreto. Embora um firewall pudesse bloquear o ping, a falha em alcançar o gateway geralmente aponta para um problema de configuração de IP ou conectividade de Camada 2, que deve ser investigado primeiro.' },
+                previous: 'check_gateway'
+            }
+        },
+
+        init() {
+            this.render(this.states.start);
+            this.currentState = 'start';
+        },
+
+        render(state) {
+            this.feedback.classList.add('hidden');
+            this.title.textContent = state.title || this.states.start.title;
+            this.scenario.textContent = state.scenario || '';
+            
+            if (state.output) {
+                this.history.push(state.output);
+            }
+            this.output.innerHTML = this.history.join('<hr class="border-border-color my-2">');
+            this.output.scrollTop = this.output.scrollHeight;
+
+            this.commands.innerHTML = '';
+            if(state.commands) {
+                state.commands.forEach(cmd => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary text-sm';
+                    btn.textContent = cmd;
+                    btn.onclick = () => this.runCommand(cmd);
+                    this.commands.appendChild(btn);
+                });
+            }
+
+            this.choices.innerHTML = '';
+            if (state.analysis) {
+                const analysisP = document.createElement('p');
+                analysisP.className = 'text-sm italic p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg';
+                analysisP.innerHTML = `<strong>Análise:</strong> ${state.analysis}`;
+                this.choices.appendChild(analysisP);
+            }
+            if(state.choices) {
+                 const choicesTitle = document.createElement('p');
+                 choicesTitle.className = 'text-sm font-semibold mt-4 mb-2';
+                 choicesTitle.textContent = 'Qual seu próximo passo?';
+                 this.choices.appendChild(choicesTitle);
+                state.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary block w-full text-left';
+                    btn.textContent = choice.text;
+                    btn.onclick = () => this.makeChoice(choice);
+                    this.choices.appendChild(btn);
+                });
+            }
+            
+            if (state.feedback) {
+                this.showFeedback(state.feedback);
+                this.render(this.states[state.previous]);
+            }
+        },
+
+        runCommand(cmd) {
+            const commandStateMap = {
+                'ipconfig /all': 'check_ip',
+                'ping 192.168.10.1': 'check_gateway',
+                'ping 8.8.8.8': 'check_dns'
+            };
+            const nextStateKey = commandStateMap[cmd];
+            if (nextStateKey) {
+                this.currentState = nextStateKey;
+                this.render(this.states[nextStateKey]);
+            }
+        },
+
+        makeChoice(choice) {
+            if (choice.next === 'start') {
+                this.history = [];
+            }
+            this.currentState = choice.next;
+            this.render(this.states[choice.next]);
+        },
+
+        showFeedback(feedback) {
+            this.feedback.textContent = feedback.text;
+            this.feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            this.feedback.classList.add(
+                feedback.type === 'success' ? 'bg-green-100' : 'bg-red-100',
+                feedback.type === 'success' ? 'dark:bg-green-900/50' : 'dark:bg-red-900/50',
+                feedback.type === 'success' ? 'text-green-800' : 'text-red-800',
+                feedback.type === 'success' ? 'dark:text-green-300' : 'dark:text-red-300'
+            );
+        }
+    };
+
+    lab.init();
+
+});
+</script>
+</body>
+</html>
